@@ -53,14 +53,14 @@ app-word-container.bottom {
 app-word-container.left {
     width: 36%;
     height: 100px;
-    left: 3%;
+    left: 3.8%;
     top: calc(50% - 50px);
     transform: translateX(-50%) rotate(-90deg);
 }
 app-word-container.right {
     width: 36%;
     height: 100px;
-    right: 3%;
+    right: 3.8%;
     top: calc(50% - 50px);
     transform: translateX(50%) rotate(90deg);
 }
