@@ -48,5 +48,20 @@ app-word-container.bottom {
     height: 100px;
     bottom: 3%;
     left: 32%;
+    transform: rotate(180deg);
+}
+app-word-container.left {
+    width: 36%;
+    height: 100px;
+    left: 3%;
+    top: calc(50% - 50px);
+    transform: translateX(-50%) rotate(-90deg);
+}
+app-word-container.right {
+    width: 36%;
+    height: 100px;
+    right: 3%;
+    top: calc(50% - 50px);
+    transform: translateX(50%) rotate(90deg);
 }
 
