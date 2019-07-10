@@ -32,13 +32,21 @@
     animation-duration: 60000ms;
 }
 
-.textcontainer {
+app-word-container {
+    display: block;
+    position: absolute;
+}
+
+app-word-container.top {
     width: 36%;
     height: 100px;
-    border-radius: 15px;
-    background: #9B3863;
-    position: absolute;
     top: 3%;
+    left: 32%;
+}
+app-word-container.bottom {
+    width: 36%;
+    height: 100px;
+    bottom: 3%;
     left: 32%;
 }
 
