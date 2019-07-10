@@ -7,4 +7,9 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'app';
+
+  topWord = 'SNELWANDELEN';
+  bottomWord = 'GOLF';
+  leftWord = 'KICKBOKSEN';
+  rightWord = 'SPEERWERPEN';
 }

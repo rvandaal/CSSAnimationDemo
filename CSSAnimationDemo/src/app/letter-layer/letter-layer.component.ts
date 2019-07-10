@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
+import { Letter } from '../letter';
 
 @Component({
   selector: 'app-letter-layer',
@@ -7,7 +8,21 @@ import { Component, OnInit } from '@angular/core';
 })
 export class LetterLayerComponent implements OnInit {
 
+  @Input()
+  topWord: string;
+
+  @Input()
+  bottomWord: string;
+
+  @Input()
+  leftWord: string;
+
+  @Input()
+  rightWord: string;
+
   canvas: HTMLCanvasElement;
+  letters: Letter[];
+  fontsize = 60;
 
   constructor() { }
 
@@ -17,19 +32,66 @@ export class LetterLayerComponent implements OnInit {
     this.canvas.height = window.innerHeight;
     const ctx = this.canvas.getContext('2d');
 
-    const angle = -Math.PI / 1;
     const fontsize = 60;
 
-    this.drawWord('SNELWANDELEN', 'top', fontsize, ctx);
-    this.drawWord('GOLF', 'bottom', fontsize, ctx);
-    this.drawWord('KICKBOKSEN', 'left', fontsize, ctx);
-    this.drawWord('SPEERWERPEN', 'right', fontsize, ctx);
+    this.initializeLetters();
+
+    let previousTime = -1;
 
     function animate() {
-      requestAnimationFrame(animate);
+      const first = previousTime === -1;
+      requestAnimationFrame(animate.bind(this));
+      const currentTime = new Date().getTime() / 1000;
+      const dt = currentTime - previousTime;
+      previousTime = currentTime;
+
+      if (first) {
+        return;
+      }
+
+      this.simulateLetters(dt);
+
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+      this.drawWord(this.topWord, 'top', fontsize, ctx);
+      this.drawWord(this.bottomWord, 'bottom', fontsize, ctx);
+      this.drawWord(this.leftWord, 'left', fontsize, ctx);
+      this.drawWord(this.rightWord, 'right', fontsize, ctx);
+
+      this.drawLetters(fontsize + 20, ctx);
     }
 
-    animate();
+    animate.apply(this);
+  }
+
+  initializeLetters() {
+    this.letters = [];
+    const allLetters = (this.topWord + this.bottomWord + this.leftWord + this.rightWord).split('');
+    allLetters.forEach(c => {
+      const letter = new Letter();
+      letter.letter = c;
+      letter.x = Math.random() * window.innerWidth;
+      letter.y = Math.random() * window.innerHeight;
+      const mul = 10;
+      letter.vx = Math.random() * 2 * mul - mul;
+      letter.vy = Math.random() * 2 * mul - mul;
+      letter.ax = (Math.random() * 2 * mul - mul) * 2;
+      letter.ay = (Math.random() * 2 * mul - mul) * 2;
+      letter.rotation = Math.random() * Math.PI * 2;
+      this.letters.push(letter);
+    });
+  }
+
+  simulateLetters(dt: number) {
+    this.letters.forEach(l => {
+      l.simulate(dt);
+    });
+  }
+
+  drawLetters(fontsize: number, ctx: CanvasRenderingContext2D) {
+    this.letters.forEach(l => {
+      this.drawLetter(l.letter, fontsize, l.x, l.y, l.rotation, ctx);
+    });
   }
 
   drawWord(word: string, position: string, fontsize: number, ctx: CanvasRenderingContext2D) {
@@ -82,11 +144,11 @@ export class LetterLayerComponent implements OnInit {
   }
 
   drawLetter(letter: string, fontsize: number, x: number, y: number, rotation: number, ctx: CanvasRenderingContext2D) {
+    // Rotate the canvas and draw the text
+    ctx.save();
     ctx.font = fontsize + 'px Verdana, sans-serif';
     ctx.fillStyle = 'white';
     ctx.textBaseline = 'bottom';
-    // Rotate the canvas and draw the text
-    ctx.save();
     // Translate the context to the middle of the letter
     ctx.translate(x + fontsize / 2, y + fontsize / 2);
     // Rotate around origin of context (= now center of letter)
@@ -96,7 +158,4 @@ export class LetterLayerComponent implements OnInit {
     ctx.fillText(letter, -fontsize / 2, fontsize / 2);
     ctx.restore();
   }
-
-  
-
 }
