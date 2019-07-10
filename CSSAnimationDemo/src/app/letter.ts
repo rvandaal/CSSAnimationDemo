@@ -2,6 +2,8 @@ export class Letter {
 
     margin = 200;
     letter: string;
+    fontsizeX: number;
+    fontsizeY: number;
     rotation: number;
     x: number;
     y: number;
@@ -10,8 +12,12 @@ export class Letter {
     ax: number;
     ay: number;
     isMovedByUser: boolean;
+    isTarget: boolean;
 
     simulate(dt: number) {
+        if (this.isTarget) {
+            return;
+        }
         // this.ax = fx; // mass = 1
         // this.ay = fy;
         this.vx += this.ax * dt;

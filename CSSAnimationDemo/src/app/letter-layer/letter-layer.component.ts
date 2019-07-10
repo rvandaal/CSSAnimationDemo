@@ -35,7 +35,7 @@ export class LetterLayerComponent implements OnInit {
 
     const fontsize = 60;
 
-    this.initializeLetters();
+    this.initializeLetters(fontsize);
     const time0 = new Date().getTime() / 1000;
 
     let previousTime = -1;
@@ -55,23 +55,26 @@ export class LetterLayerComponent implements OnInit {
 
       ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
-      this.drawWord(this.topWord, 'top', fontsize, ctx);
-      this.drawWord(this.bottomWord, 'bottom', fontsize, ctx);
-      this.drawWord(this.leftWord, 'left', fontsize, ctx);
-      this.drawWord(this.rightWord, 'right', fontsize, ctx);
-
-      this.drawLetters(fontsize + 20, ctx, currentTime - time0);
+      this.drawLetters(fontsize, ctx, currentTime - time0);
     }
 
     animate.apply(this);
   }
 
-  initializeLetters() {
+  initializeLetters(fontsize: number) {
     this.letters = [];
+
+    this.initializeTargetWord(this.topWord, 'top', fontsize);
+    this.initializeTargetWord(this.bottomWord, 'bottom', fontsize);
+    this.initializeTargetWord(this.leftWord, 'left', fontsize);
+    this.initializeTargetWord(this.rightWord, 'right', fontsize);
+
     const allLetters = (this.topWord + this.bottomWord + this.leftWord + this.rightWord).split('');
     allLetters.forEach(c => {
       const letter = new Letter();
       letter.letter = c;
+      letter.fontsizeX = fontsize + 20;
+      letter.fontsizeY = fontsize + 20;
       letter.x = Math.random() * window.innerWidth;
       letter.y = Math.random() * window.innerHeight;
       const mul = 50;
@@ -83,6 +86,41 @@ export class LetterLayerComponent implements OnInit {
     });
   }
 
+  initializeTargetWord(word: string, position: string, fontsize: number) {
+    const canvasWidth = window.innerWidth; // this.canvas.width;
+    const canvasHeight = window.innerHeight; // this.canvas.height;
+    const wordWidth = word.length * fontsize;
+    const wordContainerMargin = 20;
+    const wordContainerHalfheight = 50;
+
+    for (let i = 0; i < word.length; i++) {
+      const character = word.charAt(i);
+      const letter = new Letter();
+      letter.isTarget = true;
+      letter.letter = character;
+      letter.fontsizeX = fontsize;
+      letter.fontsizeY = fontsize;
+      if (position === 'top') {
+        letter.x = (canvasWidth + wordWidth) / 2 - (i + 1) * fontsize;
+        letter.y = wordContainerMargin + wordContainerHalfheight - fontsize / 2;
+        letter.rotation = Math.PI;
+      } else if (position === 'bottom') {
+        letter.x = (canvasWidth - wordWidth) / 2 + i * fontsize;
+        letter.y = canvasHeight - wordContainerMargin - wordContainerHalfheight - fontsize / 2;
+        letter.rotation = 0;
+      } else if (position === 'left') {
+        letter.x = wordContainerMargin + wordContainerHalfheight - fontsize / 2;
+        letter.y = (canvasHeight - wordWidth) / 2 + i * fontsize;
+        letter.rotation = Math.PI / 2;
+      } else if (position === 'right') {
+        letter.x = canvasWidth - wordContainerMargin - wordContainerHalfheight - fontsize / 2;
+        letter.y = (canvasHeight + wordWidth) / 2 - (i + 1) * fontsize;
+        letter.rotation = -Math.PI / 2;
+      }
+      this.letters.push(letter);
+    }
+  }
+
   simulateLetters(dt: number) {
     this.letters.forEach(l => {
       l.simulate(dt);
@@ -91,77 +129,24 @@ export class LetterLayerComponent implements OnInit {
 
   drawLetters(fontsize: number, ctx: CanvasRenderingContext2D, time: number) {
     this.letters.forEach(l => {
-      this.drawLetter(l.letter, fontsize, Math.min(2, time) / 2, l.x, l.y, l.rotation, ctx);
+      this.drawLetter(l, Math.min(2, time) / 2, ctx);
     });
   }
 
-  drawWord(word: string, position: string, fontsize: number, ctx: CanvasRenderingContext2D) {
-    const canvasWidth = window.innerWidth; // this.canvas.width;
-    const canvasHeight = window.innerHeight; // this.canvas.height;
-    const wordWidth = word.length * fontsize;
-    const wordContainerMargin = 20;
-    const wordContainerHalfheight = 50;
-
-    for (let i = 0; i < word.length; i++) {
-      const letter = word.charAt(i);
-      if (position === 'top') {
-        this.drawLetter(
-          letter,
-          fontsize,
-          this.wordContainerTextOpacity,
-          (canvasWidth + wordWidth) / 2 - (i + 1) * fontsize,
-          wordContainerMargin + wordContainerHalfheight - fontsize / 2,
-          Math.PI,
-          ctx
-        );
-      } else if (position === 'bottom') {
-        this.drawLetter(
-          letter,
-          fontsize,
-          this.wordContainerTextOpacity,
-          (canvasWidth - wordWidth) / 2 + i * fontsize,
-          canvasHeight - wordContainerMargin - wordContainerHalfheight - fontsize / 2,
-          0,
-          ctx
-        );
-      } else if (position === 'left') {
-        this.drawLetter(
-          letter,
-          fontsize,
-          this.wordContainerTextOpacity,
-          wordContainerMargin + wordContainerHalfheight - fontsize / 2,
-          (canvasHeight - wordWidth) / 2 + i * fontsize,
-          Math.PI / 2,
-          ctx
-        );
-      } else if (position === 'right') {
-        this.drawLetter(
-          letter,
-          fontsize,
-          this.wordContainerTextOpacity,
-          canvasWidth - wordContainerMargin - wordContainerHalfheight - fontsize / 2,
-          (canvasHeight + wordWidth) / 2 - (i + 1) * fontsize,
-          -Math.PI / 2,
-          ctx
-        );
-      }
-    }
-  }
-
-  drawLetter(letter: string, fontsize: number, opacity: number, x: number, y: number, rotation: number, ctx: CanvasRenderingContext2D) {
+  drawLetter(letter: Letter, opacity: number, ctx: CanvasRenderingContext2D) {
     // Rotate the canvas and draw the text
     ctx.save();
-    ctx.font = fontsize + 'px Verdana, sans-serif';
+    ctx.font = letter.fontsizeY + 'px Verdana, sans-serif';
     ctx.fillStyle = 'white';
     ctx.textBaseline = 'bottom';
     ctx.globalAlpha = opacity;
     // Translate the context to the middle of the letter
-    ctx.translate(x + fontsize / 2, y + fontsize / 2);
+    ctx.translate(letter.x + letter.fontsizeX / 2, letter.y + letter.fontsizeY / 2);
     // Rotate around origin of context (= now center of letter)
-    ctx.rotate(rotation);
+    ctx.rotate(letter.rotation);
     // Watch out: when writing a letter at y = 0, its middle is at -height / 2.
     // So translate 'height' pixels extra in the y, because we assumed the center was at y = height / 2
-    ctx.fillText(letter, -fontsize / 2, fontsize / 2);
+    ctx.fillText(letter.letter, -letter.fontsizeX / 2, letter.fontsizeY / 2);
     ctx.restore();
   }
 }
