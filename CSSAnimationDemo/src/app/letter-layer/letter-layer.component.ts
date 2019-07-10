@@ -1,5 +1,5 @@
 import { ComponentFixture } from '@angular/core/testing';
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { Letter } from '../letter';
 
 @Component({
@@ -21,6 +21,9 @@ export class LetterLayerComponent implements OnInit {
   @Input()
   rightWord: string;
 
+  @Output()
+  gedropt = new EventEmitter<number>();
+
   canvas: HTMLCanvasElement;
   letters: Letter[];
   fontsize = 60;
@@ -29,6 +32,7 @@ export class LetterLayerComponent implements OnInit {
   currentMovedLetter: Letter;
   mouseX: number;
   mouseY: number;
+  aantalGedropt = 0;
 
   constructor() { }
 
@@ -115,7 +119,7 @@ export class LetterLayerComponent implements OnInit {
     const canvasWidth = window.innerWidth; // this.canvas.width;
     const canvasHeight = window.innerHeight; // this.canvas.height;
     const wordWidth = word.length * fontsize;
-    const wordContainerMargin = 20;
+    const wordContainerMargin = 10;
     const wordContainerHalfheight = 50;
 
     for (let i = 0; i < word.length; i++) {
@@ -177,6 +181,8 @@ export class LetterLayerComponent implements OnInit {
               // Target geraakt
               this.currentMovedLetter.drop(tl);
               this.currentMovedLetter = null;
+              this.aantalGedropt += 1;
+              this.gedropt.emit(this.aantalGedropt);
               return;
             }
           }

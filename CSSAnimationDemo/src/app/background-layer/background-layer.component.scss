@@ -11,9 +11,9 @@ $word-container-height: 100px;
 
 .basketball, .bowlingball {
     position: absolute;
-    width: 500px;
-    height: 500px;
-    top: calc(50% - 250px);
+    width: 400px;
+    height: 400px;
+    top: calc(50% - 200px);
     animation-name: spin;    
     animation-iteration-count: infinite;
     animation-timing-function: linear;
@@ -28,11 +28,11 @@ $word-container-height: 100px;
 }
 
 .basketball { 
-    left: calc(33% - 250px);
+    left: calc(33% - 200px);
     animation-duration: 120000ms; 
 }
 .bowlingball { 
-    left: calc(67% - 250px);
+    left: calc(67% - 200px);
     animation-duration: 60000ms;
 }
 
@@ -67,5 +67,23 @@ app-word-container.right {
     right: $word-container-margin;
     top: calc(50% - #{$word-container-halfheight});
     transform: translateX(calc(50% - #{$word-container-halfheight})) rotate(90deg);
+}
+
+.aantal {
+    font-size: 72pt;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    color: mediumaquamarine;
+    position: absolute;
+    top: calc(50% - 100px);
+    left: calc(50% - 100px);
+    border: 5px solid red;
+    border-radius: 600px;
+    background: yellow;
+    width: 200px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
 }
 

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 
 @Component({
   selector: 'app-background-layer',
@@ -6,6 +6,9 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./background-layer.component.scss']
 })
 export class BackgroundLayerComponent implements OnInit {
+
+  @Input()
+  aantalGedropt: number;
 
   constructor() { }
 

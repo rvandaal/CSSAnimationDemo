@@ -1,4 +1,4 @@
 <div class="main-grid">
-  <app-background-layer></app-background-layer>
-  <app-letter-layer [topWord]="topWord" [bottomWord]="bottomWord" [leftWord]="leftWord" [rightWord]="rightWord"></app-letter-layer>
+  <app-background-layer [aantalGedropt]="aantalGedropt"></app-background-layer>
+  <app-letter-layer [topWord]="topWord" [bottomWord]="bottomWord" [leftWord]="leftWord" [rightWord]="rightWord" (gedropt)="onGedropt($event)"></app-letter-layer>
 </div>

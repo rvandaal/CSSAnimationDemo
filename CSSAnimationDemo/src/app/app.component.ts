@@ -7,9 +7,14 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'app';
+  aantalGedropt = 0;
 
-  topWord = 'SNELWANDELEN';
+  topWord = 'TENNIS';
   bottomWord = 'GOLF';
   leftWord = 'KICKBOKSEN';
   rightWord = 'SPEERWERPEN';
+
+  onGedropt(aantal: number) {
+    this.aantalGedropt = aantal;
+  }
 }
