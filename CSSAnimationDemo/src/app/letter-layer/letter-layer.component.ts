@@ -24,12 +24,20 @@ export class LetterLayerComponent implements OnInit {
     this.drawWord('GOLF', 'bottom', fontsize, ctx);
     this.drawWord('KICKBOKSEN', 'left', fontsize, ctx);
     this.drawWord('SPEERWERPEN', 'right', fontsize, ctx);
+
+    function animate() {
+      requestAnimationFrame(animate);
+    }
+
+    animate();
   }
 
   drawWord(word: string, position: string, fontsize: number, ctx: CanvasRenderingContext2D) {
     const canvasWidth = window.innerWidth; // this.canvas.width;
     const canvasHeight = window.innerHeight; // this.canvas.height;
     const wordWidth = word.length * fontsize;
+    const wordContainerMargin = 20;
+    const wordContainerHalfheight = 50;
 
     for (let i = 0; i < word.length; i++) {
       const letter = word.charAt(i);
@@ -38,7 +46,7 @@ export class LetterLayerComponent implements OnInit {
           letter,
           fontsize,
           (canvasWidth + wordWidth) / 2 - (i + 1) * fontsize,
-          0.03 * canvasHeight + 50 - fontsize / 2,
+          wordContainerMargin + wordContainerHalfheight - fontsize / 2,
           Math.PI,
           ctx
         );
@@ -47,7 +55,7 @@ export class LetterLayerComponent implements OnInit {
           letter,
           fontsize,
           (canvasWidth - wordWidth) / 2 + i * fontsize,
-          canvasHeight - 0.03 * canvasHeight - 50 - fontsize / 2,
+          canvasHeight - wordContainerMargin - wordContainerHalfheight - fontsize / 2,
           0,
           ctx
         );
@@ -55,7 +63,7 @@ export class LetterLayerComponent implements OnInit {
         this.drawLetter(
           letter,
           fontsize,
-          0.03 * window.innerHeight + 50 - fontsize / 2,
+          wordContainerMargin + wordContainerHalfheight - fontsize / 2,
           (canvasHeight - wordWidth) / 2 + i * fontsize,
           Math.PI / 2,
           ctx
@@ -64,7 +72,7 @@ export class LetterLayerComponent implements OnInit {
         this.drawLetter(
           letter,
           fontsize,
-          canvasWidth - 0.03 * canvasHeight - 50 - fontsize / 2,
+          canvasWidth - wordContainerMargin - wordContainerHalfheight - fontsize / 2,
           (canvasHeight + wordWidth) / 2 - (i + 1) * fontsize,
           -Math.PI / 2,
           ctx
@@ -88,5 +96,7 @@ export class LetterLayerComponent implements OnInit {
     ctx.fillText(letter, -fontsize / 2, fontsize / 2);
     ctx.restore();
   }
+
+  
 
 }
