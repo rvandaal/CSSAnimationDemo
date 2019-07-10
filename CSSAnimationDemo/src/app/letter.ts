@@ -2,8 +2,8 @@ export class Letter {
 
     margin = 200;
     letter: string;
-    fontsizeX: number;
-    fontsizeY: number;
+    sizeX: number;
+    sizeY: number;
     opacity = 1;
     color = 'white';
     rotation: number;
@@ -46,14 +46,14 @@ export class Letter {
             this.x = progress * this.target.x + (1 - progress) * this.dropX;
             this.y = progress * this.target.y + (1 - progress) * this.dropY;
             this.rotation = progress * this.target.rotation + (1 - progress) * this.dropRotation;
-            this.fontsizeX = progress * this.target.fontsizeX + (1 - progress) * this.dropSizeX;
-            this.fontsizeY = progress * this.target.fontsizeY + (1 - progress) * this.dropSizeY;
+            this.sizeX = progress * this.target.sizeX + (1 - progress) * this.dropSizeX;
+            this.sizeY = progress * this.target.sizeY + (1 - progress) * this.dropSizeY;
             this.opacity = (1 - progress);
             return;
         }
         if (this.isMovedByUser) {
-            this.x = this.mouseX - this.fontsizeX / 2 - this.mouseDeltaX;
-            this.y = this.mouseY - this.fontsizeY / 2 - this.mouseDeltaY;
+            this.x = this.mouseX - this.sizeX / 2 - this.mouseDeltaX;
+            this.y = this.mouseY - this.sizeY / 2 - this.mouseDeltaY;
             return;
         }
         this.vx += this.ax * dt;
@@ -79,17 +79,17 @@ export class Letter {
         }
         // Rotate the canvas and draw the text
         ctx.save();
-        ctx.font = this.fontsizeY + 'px Verdana, sans-serif';
+        ctx.font = this.sizeY + 'px Verdana, sans-serif';
         ctx.fillStyle = this.color;
         ctx.textBaseline = 'bottom';
         ctx.globalAlpha = this.opacity;
         // Translate the context to the middle of the this
-        ctx.translate(this.x + this.fontsizeX / 2, this.y + this.fontsizeY / 2);
+        ctx.translate(this.x + this.sizeX / 2, this.y + this.sizeY / 2);
         // Rotate around origin of context (= now center of this)
         ctx.rotate(this.rotation);
         // Watch out: when writing a this at y = 0, its middle is at -height / 2.
         // So translate 'height' pixels extra in the y, because we assumed the center was at y = height / 2
-        ctx.fillText(this.letter, -this.fontsizeX / 2, this.fontsizeY / 2);
+        ctx.fillText(this.letter, -this.sizeX / 2, this.sizeY / 2);
         ctx.restore();
     }
 
@@ -99,15 +99,15 @@ export class Letter {
         this.dropX = this.x;
         this.dropY = this.y;
         this.dropRotation = this.rotation;
-        this.dropSizeX = this.fontsizeX;
-        this.dropSizeY = this.fontsizeY;
+        this.dropSizeX = this.sizeX;
+        this.dropSizeY = this.sizeY;
     }
 
     getDistanceFrom(otherX: number, otherY: number) {
-        return Math.sqrt(Math.pow(this.x + this.fontsizeX / 2 - otherX, 2) + Math.pow(this.y + this.fontsizeY / 2 - otherY, 2));
+        return Math.sqrt(Math.pow(this.x + this.sizeX / 2 - otherX, 2) + Math.pow(this.y + this.sizeY / 2 - otherY, 2));
     }
 
     isInside(otherX: number, otherY: number) {
-        return this.getDistanceFrom(otherX, otherY) < this.fontsizeY / 2;
+        return this.getDistanceFrom(otherX, otherY) < this.sizeY / 2;
     }
 }

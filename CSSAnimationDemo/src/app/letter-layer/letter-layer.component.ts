@@ -101,8 +101,8 @@ export class LetterLayerComponent implements OnInit {
     allLetters.forEach(c => {
       const letter = new Letter();
       letter.letter = c;
-      letter.fontsizeX = fontsize + 20;
-      letter.fontsizeY = fontsize + 20;
+      letter.sizeX = fontsize + 20;
+      letter.sizeY = fontsize + 20;
       letter.opacity = 0.3;
       letter.x = Math.random() * window.innerWidth;
       letter.y = Math.random() * window.innerHeight;
@@ -127,8 +127,8 @@ export class LetterLayerComponent implements OnInit {
       const letter = new Letter();
       letter.isTarget = true;
       letter.letter = character;
-      letter.fontsizeX = fontsize;
-      letter.fontsizeY = fontsize;
+      letter.sizeX = fontsize;
+      letter.sizeY = fontsize;
       if (position === 'top') {
         letter.x = (canvasWidth + wordWidth) / 2 - (i + 1) * fontsize;
         letter.y = wordContainerMargin + wordContainerHalfheight - fontsize / 2;
@@ -162,8 +162,8 @@ export class LetterLayerComponent implements OnInit {
           this.currentMovedLetter = l;
           l.mouseX = this.mouseX;
           l.mouseY = this.mouseY;
-          l.mouseDeltaX = l.mouseX - l.x - l.fontsizeX / 2;
-          l.mouseDeltaY = l.mouseY - l.y - l.fontsizeY / 2;
+          l.mouseDeltaX = l.mouseX - l.x - l.sizeX / 2;
+          l.mouseDeltaY = l.mouseY - l.y - l.sizeY / 2;
         }
       }
       if (this.currentMovedLetter) {
