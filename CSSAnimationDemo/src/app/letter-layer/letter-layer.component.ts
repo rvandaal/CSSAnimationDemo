@@ -1,3 +1,4 @@
+import { ComponentFixture } from '@angular/core/testing';
 import { Component, OnInit, Input } from '@angular/core';
 import { Letter } from '../letter';
 
@@ -24,6 +25,10 @@ export class LetterLayerComponent implements OnInit {
   letters: Letter[];
   fontsize = 60;
   wordContainerTextOpacity = 0.7;
+  isMouseDown = false;
+  currentMovedLetter: Letter;
+  mouseX: number;
+  mouseY: number;
 
   constructor() { }
 
@@ -32,6 +37,23 @@ export class LetterLayerComponent implements OnInit {
     this.canvas.width = window.innerWidth; // blijkbaar is width en height op 100% zetten via CSS niet genoeg!
     this.canvas.height = window.innerHeight;
     const ctx = this.canvas.getContext('2d');
+
+    this.canvas.onmousedown = (function (e) {
+      this.mouseX = e.x;
+      this.mouseY = e.y;
+      this.isMouseDown = true;
+    }).bind(this);
+
+    this.canvas.onmouseup = (function (e) {
+      this.mouseX = e.x;
+      this.mouseY = e.y;
+      this.isMouseDown = false;
+    }).bind(this);
+
+    this.canvas.onmousemove = (function (e) {
+      this.mouseX = e.x;
+      this.mouseY = e.y;
+    }).bind(this);
 
     const fontsize = 60;
 
@@ -51,11 +73,13 @@ export class LetterLayerComponent implements OnInit {
         return;
       }
 
-      this.simulateLetters(dt);
+      this.checkInteractionLetters();
+
+      this.simulateLetters(currentTime, dt);
 
       ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
-      this.drawLetters(fontsize, ctx, currentTime - time0);
+      this.drawLetters(ctx, currentTime - time0);
     }
 
     animate.apply(this);
@@ -75,6 +99,7 @@ export class LetterLayerComponent implements OnInit {
       letter.letter = c;
       letter.fontsizeX = fontsize + 20;
       letter.fontsizeY = fontsize + 20;
+      letter.opacity = 0.3;
       letter.x = Math.random() * window.innerWidth;
       letter.y = Math.random() * window.innerHeight;
       const mul = 50;
@@ -121,32 +146,55 @@ export class LetterLayerComponent implements OnInit {
     }
   }
 
-  simulateLetters(dt: number) {
+  checkInteractionLetters() {
     this.letters.forEach(l => {
-      l.simulate(dt);
+      if (l.isInside(this.mouseX, this.mouseY) && !l.isTarget) {
+        l.isMovedByUser = this.isMouseDown;
+        if (this.isMouseDown && !this.currentMovedLetter) {
+          this.currentMovedLetter = l;
+          l.mouseX = this.mouseX;
+          l.mouseY = this.mouseY;
+          l.mouseDeltaX = l.mouseX - l.x - l.fontsizeX / 2;
+          l.mouseDeltaY = l.mouseY - l.y - l.fontsizeY / 2;
+        }
+      }
+      if (this.currentMovedLetter) {
+        this.currentMovedLetter.mouseX = this.mouseX;
+        this.currentMovedLetter.mouseY = this.mouseY;
+        if (!this.isMouseDown) {
+          // letter is dropped, check target
+          const targetLetters = this.letters.filter(l => l.isTarget);
+          // tslint:disable-next-line:prefer-const
+          for (let tl of targetLetters) {
+            if (
+              tl.isInside(this.currentMovedLetter.mouseX, this.currentMovedLetter.mouseY) &&
+              tl.letter === this.currentMovedLetter.letter
+            ) {
+              // Target geraakt
+              this.currentMovedLetter.drop(tl);
+              return;
+            }
+          }
+          this.currentMovedLetter = null;
+        }
+      }
     });
   }
 
-  drawLetters(fontsize: number, ctx: CanvasRenderingContext2D, time: number) {
+  simulateLetters(currentTime: number, dt: number) {
     this.letters.forEach(l => {
-      this.drawLetter(l, Math.min(2, time) / 2, ctx);
+      if (l.simulate(currentTime, dt)) {
+        this.currentMovedLetter = null;
+      }
     });
   }
 
-  drawLetter(letter: Letter, opacity: number, ctx: CanvasRenderingContext2D) {
-    // Rotate the canvas and draw the text
-    ctx.save();
-    ctx.font = letter.fontsizeY + 'px Verdana, sans-serif';
-    ctx.fillStyle = 'white';
-    ctx.textBaseline = 'bottom';
-    ctx.globalAlpha = opacity;
-    // Translate the context to the middle of the letter
-    ctx.translate(letter.x + letter.fontsizeX / 2, letter.y + letter.fontsizeY / 2);
-    // Rotate around origin of context (= now center of letter)
-    ctx.rotate(letter.rotation);
-    // Watch out: when writing a letter at y = 0, its middle is at -height / 2.
-    // So translate 'height' pixels extra in the y, because we assumed the center was at y = height / 2
-    ctx.fillText(letter.letter, -letter.fontsizeX / 2, letter.fontsizeY / 2);
-    ctx.restore();
+  drawLetters(ctx: CanvasRenderingContext2D, time: number) {
+    this.letters.forEach(l => {
+      l.opacity = Math.min(2, time) / 2 * 0.9;
+      l.drawLetter(ctx);
+    });
   }
+
+
 }
