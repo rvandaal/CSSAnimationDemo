@@ -148,9 +148,13 @@ export class LetterLayerComponent implements OnInit {
 
   checkInteractionLetters() {
     this.letters.forEach(l => {
-      if (l.isInside(this.mouseX, this.mouseY) && !l.isTarget) {
+      if (!l.isTarget) {
+        l.color = 'white';
+      }
+      if (l.isInside(this.mouseX, this.mouseY) && !l.isTarget && !this.currentMovedLetter && !l.target && !l.isDropped) {
+        l.color = 'orange';
         l.isMovedByUser = this.isMouseDown;
-        if (this.isMouseDown && !this.currentMovedLetter) {
+        if (this.isMouseDown) {
           this.currentMovedLetter = l;
           l.mouseX = this.mouseX;
           l.mouseY = this.mouseY;
@@ -163,7 +167,7 @@ export class LetterLayerComponent implements OnInit {
         this.currentMovedLetter.mouseY = this.mouseY;
         if (!this.isMouseDown) {
           // letter is dropped, check target
-          const targetLetters = this.letters.filter(l => l.isTarget);
+          const targetLetters = this.letters.filter(le => le.isTarget && !le.isDropped);
           // tslint:disable-next-line:prefer-const
           for (let tl of targetLetters) {
             if (
@@ -172,6 +176,7 @@ export class LetterLayerComponent implements OnInit {
             ) {
               // Target geraakt
               this.currentMovedLetter.drop(tl);
+              this.currentMovedLetter = null;
               return;
             }
           }
@@ -183,9 +188,7 @@ export class LetterLayerComponent implements OnInit {
 
   simulateLetters(currentTime: number, dt: number) {
     this.letters.forEach(l => {
-      if (l.simulate(currentTime, dt)) {
-        this.currentMovedLetter = null;
-      }
+      l.simulate(currentTime, dt);
     });
   }
 

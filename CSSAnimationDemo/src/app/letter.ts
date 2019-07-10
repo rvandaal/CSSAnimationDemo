@@ -5,6 +5,7 @@ export class Letter {
     fontsizeX: number;
     fontsizeY: number;
     opacity = 1;
+    color = 'white';
     rotation: number;
     x: number;
     y: number;
@@ -27,7 +28,7 @@ export class Letter {
     target: Letter;
     isDropped = false;
 
-    simulate(currentTime: number, dt: number): boolean {
+    simulate(currentTime: number, dt: number) {
         if (this.isTarget || this.isDropped) {
             return;
         }
@@ -36,8 +37,10 @@ export class Letter {
             const progress = (currentTime - this.dropTime) / 1; // morph in 1s
             if (progress > 1) {
                 this.isDropped = true;
+                this.target.color = 'red';
+                this.target.isDropped = true;
                 this.target = null;
-                return true;
+                return;
             }
 
             this.x = progress * this.target.x + (1 - progress) * this.dropX;
@@ -67,17 +70,17 @@ export class Letter {
         }
 
         this.rotation = Math.tanh(this.vy / this.vx);
-        return false;
+        return;
     }
 
     drawLetter(ctx: CanvasRenderingContext2D) {
-        if (this.isDropped) {
+        if (this.isDropped && !this.isTarget) {
             return;
         }
         // Rotate the canvas and draw the text
         ctx.save();
         ctx.font = this.fontsizeY + 'px Verdana, sans-serif';
-        ctx.fillStyle = 'white';
+        ctx.fillStyle = this.color;
         ctx.textBaseline = 'bottom';
         ctx.globalAlpha = this.opacity;
         // Translate the context to the middle of the this
