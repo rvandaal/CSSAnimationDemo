@@ -23,6 +23,7 @@ export class LetterLayerComponent implements OnInit {
   canvas: HTMLCanvasElement;
   letters: Letter[];
   fontsize = 60;
+  wordContainerTextOpacity = 0.7;
 
   constructor() { }
 
@@ -35,6 +36,7 @@ export class LetterLayerComponent implements OnInit {
     const fontsize = 60;
 
     this.initializeLetters();
+    const time0 = new Date().getTime() / 1000;
 
     let previousTime = -1;
 
@@ -58,7 +60,7 @@ export class LetterLayerComponent implements OnInit {
       this.drawWord(this.leftWord, 'left', fontsize, ctx);
       this.drawWord(this.rightWord, 'right', fontsize, ctx);
 
-      this.drawLetters(fontsize + 20, ctx);
+      this.drawLetters(fontsize + 20, ctx, currentTime - time0);
     }
 
     animate.apply(this);
@@ -72,12 +74,11 @@ export class LetterLayerComponent implements OnInit {
       letter.letter = c;
       letter.x = Math.random() * window.innerWidth;
       letter.y = Math.random() * window.innerHeight;
-      const mul = 10;
+      const mul = 50;
       letter.vx = Math.random() * 2 * mul - mul;
       letter.vy = Math.random() * 2 * mul - mul;
-      letter.ax = (Math.random() * 2 * mul - mul) * 2;
-      letter.ay = (Math.random() * 2 * mul - mul) * 2;
-      letter.rotation = Math.random() * Math.PI * 2;
+      letter.ax = (Math.random() * 2 * mul - mul) * 0;
+      letter.ay = (Math.random() * 2 * mul - mul) * 0;
       this.letters.push(letter);
     });
   }
@@ -88,9 +89,9 @@ export class LetterLayerComponent implements OnInit {
     });
   }
 
-  drawLetters(fontsize: number, ctx: CanvasRenderingContext2D) {
+  drawLetters(fontsize: number, ctx: CanvasRenderingContext2D, time: number) {
     this.letters.forEach(l => {
-      this.drawLetter(l.letter, fontsize, l.x, l.y, l.rotation, ctx);
+      this.drawLetter(l.letter, fontsize, Math.min(2, time) / 2, l.x, l.y, l.rotation, ctx);
     });
   }
 
@@ -107,6 +108,7 @@ export class LetterLayerComponent implements OnInit {
         this.drawLetter(
           letter,
           fontsize,
+          this.wordContainerTextOpacity,
           (canvasWidth + wordWidth) / 2 - (i + 1) * fontsize,
           wordContainerMargin + wordContainerHalfheight - fontsize / 2,
           Math.PI,
@@ -116,6 +118,7 @@ export class LetterLayerComponent implements OnInit {
         this.drawLetter(
           letter,
           fontsize,
+          this.wordContainerTextOpacity,
           (canvasWidth - wordWidth) / 2 + i * fontsize,
           canvasHeight - wordContainerMargin - wordContainerHalfheight - fontsize / 2,
           0,
@@ -125,6 +128,7 @@ export class LetterLayerComponent implements OnInit {
         this.drawLetter(
           letter,
           fontsize,
+          this.wordContainerTextOpacity,
           wordContainerMargin + wordContainerHalfheight - fontsize / 2,
           (canvasHeight - wordWidth) / 2 + i * fontsize,
           Math.PI / 2,
@@ -134,6 +138,7 @@ export class LetterLayerComponent implements OnInit {
         this.drawLetter(
           letter,
           fontsize,
+          this.wordContainerTextOpacity,
           canvasWidth - wordContainerMargin - wordContainerHalfheight - fontsize / 2,
           (canvasHeight + wordWidth) / 2 - (i + 1) * fontsize,
           -Math.PI / 2,
@@ -143,12 +148,13 @@ export class LetterLayerComponent implements OnInit {
     }
   }
 
-  drawLetter(letter: string, fontsize: number, x: number, y: number, rotation: number, ctx: CanvasRenderingContext2D) {
+  drawLetter(letter: string, fontsize: number, opacity: number, x: number, y: number, rotation: number, ctx: CanvasRenderingContext2D) {
     // Rotate the canvas and draw the text
     ctx.save();
     ctx.font = fontsize + 'px Verdana, sans-serif';
     ctx.fillStyle = 'white';
     ctx.textBaseline = 'bottom';
+    ctx.globalAlpha = opacity;
     // Translate the context to the middle of the letter
     ctx.translate(x + fontsize / 2, y + fontsize / 2);
     // Rotate around origin of context (= now center of letter)
