@@ -1,6 +1,5 @@
-import { ComponentFixture } from '@angular/core/testing';
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { Letter } from '../letter';
+import { Letter } from '../../models/letter';
 
 @Component({
   selector: 'app-letter-layer',
