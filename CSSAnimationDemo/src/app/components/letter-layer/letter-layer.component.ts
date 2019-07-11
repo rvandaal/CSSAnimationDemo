@@ -151,42 +151,44 @@ export class LetterLayerComponent implements OnInit {
   }
 
   checkInteractionLetters() {
-    this.letters.forEach(l => {
-      if (!l.isTarget) {
-        l.color = 'white';
-      }
-      if (l.isInside(this.mousePoint) && !l.isTarget && !this.currentMovedLetter && l.state < LetterState.BeingDropped) {
-        l.color = 'orange';
-        if (this.isMouseDown) {
-          this.currentMovedLetter = l;
-          l.state = LetterState.MovedByUser;
-          l.mousePoint = this.mousePoint.clone();
-          l.mouseDelta = l.mousePoint.subP(l.pos);
+    if (!this.currentMovedLetter) {
+      this.letters.forEach(l => {
+        if (!l.isTarget) {
+          l.color = 'white';
         }
-      }
-      if (this.currentMovedLetter) {
-        this.currentMovedLetter.mousePoint = this.mousePoint.clone();
-        if (!this.isMouseDown) {
-          // letter is dropped, check target
-          const targetLetters = this.letters.filter(le => le.isTarget && le.state !== LetterState.Dropped);
-          // tslint:disable-next-line:prefer-const
-          for (let tl of targetLetters) {
-            if (
-              tl.isInside(this.currentMovedLetter.mousePoint) &&
-              tl.letter === this.currentMovedLetter.letter
-            ) {
-              // Losgelaten boven juiste target
-              this.currentMovedLetter.drop(tl);
-              this.currentMovedLetter = null;
-              this.aantalGedropt += 1;
-              this.gedropt.emit(this.aantalGedropt);
-              return;
-            }
+        if (!l.isTarget && l.state < LetterState.BeingDropped && l.isInside(this.mousePoint)) {
+          l.color = 'orange';
+          if (this.isMouseDown) {
+            this.currentMovedLetter = l;
+            l.state = LetterState.MovedByUser;
+            l.mousePoint = this.mousePoint.clone();
+            l.mouseDelta = l.mousePoint.subP(l.pos);
           }
-          this.currentMovedLetter = null;
         }
+      });
+    } else {
+      this.currentMovedLetter.mousePoint = this.mousePoint.clone();
+      if (!this.isMouseDown) {
+        // letter is dropped, check target
+        const targetLetters = this.letters.filter(le => le.isTarget && le.state !== LetterState.Dropped);
+        // tslint:disable-next-line:prefer-const
+        for (let tl of targetLetters) {
+          if (
+            tl.isInside(this.currentMovedLetter.mousePoint) &&
+            tl.letter === this.currentMovedLetter.letter
+          ) {
+            // Losgelaten boven juiste target
+            this.currentMovedLetter.drop(tl);
+            this.currentMovedLetter = null;
+            this.aantalGedropt += 1;
+            this.gedropt.emit(this.aantalGedropt);
+            return;
+          }
+        }
+        this.currentMovedLetter.state = LetterState.Floating;
+        this.currentMovedLetter = null;
       }
-    });
+    }
   }
 
   simulateLetters(currentTime: number, dt: number) {

@@ -10,7 +10,7 @@ export enum LetterState {
 }
 
 export class Letter {
-    state: LetterState;
+    state = LetterState.Floating;
     letter: string;
     opacity = 1;
     color = 'white';
@@ -19,7 +19,6 @@ export class Letter {
     pos: Point;
     vel: Vector;
     acc: Vector;
-    isMovedByUser = false;
     mousePoint: Point;
     mouseDelta: Vector;
     isTarget = false;
@@ -33,8 +32,8 @@ export class Letter {
         if (this.isTarget || this.state === LetterState.Dropped) {
             return;
         }
-        if (this.target) {
-            // letter is being dropped, morph into target
+        if (this.state === LetterState.BeingDropped) {
+            // Morph into target
             const progress = (currentTime - this.dropTime) / 1; // morph in 1s
             if (progress > 1) {
                 this.state = LetterState.Dropped;
@@ -50,7 +49,7 @@ export class Letter {
             this.opacity = (1 - progress);
             return;
         }
-        if (this.isMovedByUser) {
+        if (this.state === LetterState.MovedByUser) {
             this.pos = this.mousePoint.subV(this.mouseDelta) as Point;
             return;
         }
