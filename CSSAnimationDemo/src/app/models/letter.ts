@@ -3,15 +3,14 @@ import { Vector } from './vector';
 import { Size } from './size';
 
 export enum LetterState {
-    Floating,
-    MovedByUser,
-    IsBeingDropped,
-    IsDropped
+    Floating = 0,
+    MovedByUser = 1,
+    BeingDropped = 2,
+    Dropped = 3
 }
 
 export class Letter {
-
-    margin = 200;
+    state: LetterState;
     letter: string;
     opacity = 1;
     color = 'white';
@@ -29,19 +28,18 @@ export class Letter {
     dropRotation: number;
     dropSize: Size;
     target: Letter;
-    isDropped = false;
 
     simulate(currentTime: number, dt: number) {
-        if (this.isTarget || this.isDropped) {
+        if (this.isTarget || this.state === LetterState.Dropped) {
             return;
         }
         if (this.target) {
             // letter is being dropped, morph into target
             const progress = (currentTime - this.dropTime) / 1; // morph in 1s
             if (progress > 1) {
-                this.isDropped = true;
+                this.state = LetterState.Dropped;
+                this.target.state = LetterState.Dropped;
                 this.target.color = 'red';
-                this.target.isDropped = true;
                 this.target = null;
                 return;
             }
@@ -58,20 +56,13 @@ export class Letter {
         }
         this.vel = this.vel.addV(this.acc.multiply(dt));
         this.pos = this.pos.addV(this.vel.multiply(dt));
-
-        if (
-            this.pos.x < -this.margin || this.pos.x > window.innerWidth + this.margin ||
-            this.pos.y < -this.margin || this.pos.y > window.innerHeight + this.margin
-        ) {
-            this.vel.negate();
-        }
-
-        this.rotation = Math.tanh(this.vel.y / this.vel.x);
+        this.acc = new Vector((window.innerWidth / 2 - this.pos.x) * 0.01, (window.innerHeight / 2 - this.pos.y) * 0.01);
+        this.rotation = Math.tanh(Math.abs(this.vel.y / this.vel.x));
         return;
     }
 
     draw(ctx: CanvasRenderingContext2D) {
-        if (this.isDropped && !this.isTarget) {
+        if (this.state === LetterState.Dropped && !this.isTarget) {
             return;
         }
         // Rotate the canvas and draw the text
@@ -92,6 +83,7 @@ export class Letter {
 
     drop(target: Letter) {
         this.target = target;
+        this.state = LetterState.BeingDropped;
         this.dropTime = new Date().getTime() / 1000;
         this.dropPoint = this.pos.clone();
         this.dropRotation = this.rotation;

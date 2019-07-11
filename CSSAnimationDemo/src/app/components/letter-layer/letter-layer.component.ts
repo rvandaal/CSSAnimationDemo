@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { Letter } from '../../models/letter';
+import { Letter, LetterState } from '../../models/letter';
 import { Point } from 'src/app/models/point';
 import { Vector } from 'src/app/models/vector';
 import { Size } from 'src/app/models/size';
@@ -28,8 +28,8 @@ export class LetterLayerComponent implements OnInit {
 
   canvas: HTMLCanvasElement;
   letters: Letter[];
-  fontsize = 60;
   wordContainerTextOpacity = 0.7;
+  letterOpacity = 0.9;
   isMouseDown = false;
   currentMovedLetter: Letter;
   mousePoint: Point;
@@ -58,16 +58,15 @@ export class LetterLayerComponent implements OnInit {
     }).bind(this);
 
     const fontsize = 60;
-
     this.initializeLetters(fontsize);
-    const time0 = new Date().getTime() / 1000;
+    const time0 = this.getCurrentTime();
 
     let previousTime = -1;
 
     function animate() {
       const first = previousTime === -1;
       requestAnimationFrame(animate.bind(this));
-      const currentTime = new Date().getTime() / 1000;
+      const currentTime = this.getCurrentTime();
       const dt = currentTime - previousTime;
       previousTime = currentTime;
 
@@ -156,11 +155,11 @@ export class LetterLayerComponent implements OnInit {
       if (!l.isTarget) {
         l.color = 'white';
       }
-      if (l.isInside(this.mousePoint) && !l.isTarget && !this.currentMovedLetter && !l.target && !l.isDropped) {
+      if (l.isInside(this.mousePoint) && !l.isTarget && !this.currentMovedLetter && l.state < LetterState.BeingDropped) {
         l.color = 'orange';
-        l.isMovedByUser = this.isMouseDown;
         if (this.isMouseDown) {
           this.currentMovedLetter = l;
+          l.state = LetterState.MovedByUser;
           l.mousePoint = this.mousePoint.clone();
           l.mouseDelta = l.mousePoint.subP(l.pos);
         }
@@ -169,14 +168,14 @@ export class LetterLayerComponent implements OnInit {
         this.currentMovedLetter.mousePoint = this.mousePoint.clone();
         if (!this.isMouseDown) {
           // letter is dropped, check target
-          const targetLetters = this.letters.filter(le => le.isTarget && !le.isDropped);
+          const targetLetters = this.letters.filter(le => le.isTarget && le.state !== LetterState.Dropped);
           // tslint:disable-next-line:prefer-const
           for (let tl of targetLetters) {
             if (
               tl.isInside(this.currentMovedLetter.mousePoint) &&
               tl.letter === this.currentMovedLetter.letter
             ) {
-              // Target geraakt
+              // Losgelaten boven juiste target
               this.currentMovedLetter.drop(tl);
               this.currentMovedLetter = null;
               this.aantalGedropt += 1;
@@ -198,10 +197,12 @@ export class LetterLayerComponent implements OnInit {
 
   drawLetters(ctx: CanvasRenderingContext2D, time: number) {
     this.letters.forEach(l => {
-      l.opacity = Math.min(2, time) / 2 * 0.9;
+      l.opacity = Math.min(2, time) / 2 * this.letterOpacity;
       l.draw(ctx);
     });
   }
 
-
+  getCurrentTime() {
+    return new Date().getTime() / 1000;
+  }
 }
