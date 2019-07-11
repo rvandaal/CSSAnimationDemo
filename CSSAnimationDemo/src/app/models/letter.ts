@@ -12,7 +12,9 @@ export enum LetterState {
 export class Letter {
 
     static wordFactors = {
+        f: 0.9,
         i: 0.8,
+        l: 0.9,
         w: 1.2
     };
 
