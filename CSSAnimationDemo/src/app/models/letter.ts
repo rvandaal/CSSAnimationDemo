@@ -41,13 +41,12 @@ export class Letter {
 
             this.pos = this.dropPoint.morph(this.target.pos, progress);
             this.rotation = progress * this.target.rotation + (1 - progress) * this.dropRotation;
-             // todo: weet niet of je een baseclass naar een subclass mag casten als de subclass geen fields toevoegt
-            this.size = this.dropSize.morph(this.target.size, progress) as Size;
+            this.size = this.dropSize.morph(this.target.size, progress);
             this.opacity = (1 - progress);
             return;
         }
         if (this.isMovedByUser) {
-            this.pos = this.mousePoint.subS(this.size.multiply(0.5)).subV(this.mouseDelta) as Point;
+            this.pos = this.mousePoint.subV(this.mouseDelta) as Point;
             return;
         }
         this.vel = this.vel.addV(this.acc.multiply(dt));
@@ -75,7 +74,7 @@ export class Letter {
         ctx.textBaseline = 'bottom';
         ctx.globalAlpha = this.opacity;
         // Translate the context to the middle of the this
-        ctx.translate(this.pos.x + this.size.x / 2, this.pos.y + this.size.y / 2);
+        ctx.translate(this.pos.x, this.pos.y);
         // Rotate around origin of context (= now center of this)
         ctx.rotate(this.rotation);
         // Watch out: when writing a this at y = 0, its middle is at -height / 2.
@@ -93,7 +92,7 @@ export class Letter {
     }
 
     getDistanceFrom(point: Point) {
-        return Math.sqrt(Math.pow(this.pos.x + this.size.x / 2 - point.x, 2) + Math.pow(this.pos.y + this.size.y / 2 - point.y, 2));
+        return Math.sqrt(Math.pow(this.pos.x - point.x, 2) + Math.pow(this.pos.y - point.y, 2));
     }
 
     isInside(point: Point) {

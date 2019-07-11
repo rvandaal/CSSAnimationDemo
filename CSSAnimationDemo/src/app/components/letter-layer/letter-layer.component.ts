@@ -110,8 +110,8 @@ export class LetterLayerComponent implements OnInit {
   }
 
   initializeTargetWord(word: string, position: string, fontsize: number) {
-    const canvasWidth = window.innerWidth; // this.canvas.width;
-    const canvasHeight = window.innerHeight; // this.canvas.height;
+    const canvasWidth = window.innerWidth;
+    const canvasHeight = window.innerHeight;
     const wordWidth = word.length * fontsize;
     const wordContainerMargin = 10;
     const wordContainerHalfheight = 50;
@@ -124,26 +124,26 @@ export class LetterLayerComponent implements OnInit {
       letter.size = new Size(fontsize, fontsize);
       if (position === 'top') {
         letter.pos = new Point(
-          (canvasWidth + wordWidth) / 2 - (i + 1) * fontsize,
-          wordContainerMargin + wordContainerHalfheight - fontsize / 2
+          (canvasWidth + wordWidth) / 2 - (i + 0.5) * fontsize,
+          wordContainerMargin + wordContainerHalfheight
         );
         letter.rotation = Math.PI;
       } else if (position === 'bottom') {
         letter.pos = new Point(
-          (canvasWidth - wordWidth) / 2 + i * fontsize,
-          canvasHeight - wordContainerMargin - wordContainerHalfheight - fontsize / 2
+          (canvasWidth - wordWidth) / 2 + (i + 0.5) * fontsize,
+          canvasHeight - wordContainerMargin - wordContainerHalfheight
         );
         letter.rotation = 0;
       } else if (position === 'left') {
         letter.pos = new Point(
-          wordContainerMargin + wordContainerHalfheight - fontsize / 2,
-          (canvasHeight - wordWidth) / 2 + i * fontsize
+          wordContainerMargin + wordContainerHalfheight,
+          (canvasHeight - wordWidth) / 2 + (i + 0.5) * fontsize
         );
         letter.rotation = Math.PI / 2;
       } else if (position === 'right') {
         letter.pos = new Point(
-          canvasWidth - wordContainerMargin - wordContainerHalfheight - fontsize / 2,
-          (canvasHeight + wordWidth) / 2 - (i + 1) * fontsize
+          canvasWidth - wordContainerMargin - wordContainerHalfheight,
+          (canvasHeight + wordWidth) / 2 - (i + 0.5) * fontsize
         );
         letter.rotation = -Math.PI / 2;
       }
@@ -161,12 +161,12 @@ export class LetterLayerComponent implements OnInit {
         l.isMovedByUser = this.isMouseDown;
         if (this.isMouseDown) {
           this.currentMovedLetter = l;
-          l.mousePoint = this.mousePoint;
-          l.mouseDelta = l.mousePoint.subP(l.pos).subS(l.size.multiply(0.5));
+          l.mousePoint = this.mousePoint.clone();
+          l.mouseDelta = l.mousePoint.subP(l.pos);
         }
       }
       if (this.currentMovedLetter) {
-        this.currentMovedLetter.mousePoint = this.mousePoint;
+        this.currentMovedLetter.mousePoint = this.mousePoint.clone();
         if (!this.isMouseDown) {
           // letter is dropped, check target
           const targetLetters = this.letters.filter(le => le.isTarget && !le.isDropped);
