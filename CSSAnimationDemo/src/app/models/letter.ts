@@ -2,6 +2,13 @@ import { Point } from './point';
 import { Vector } from './vector';
 import { Size } from './size';
 
+export enum LetterState {
+    Floating,
+    MovedByUser,
+    IsBeingDropped,
+    IsDropped
+}
+
 export class Letter {
 
     margin = 200;
@@ -63,7 +70,7 @@ export class Letter {
         return;
     }
 
-    drawLetter(ctx: CanvasRenderingContext2D) {
+    draw(ctx: CanvasRenderingContext2D) {
         if (this.isDropped && !this.isTarget) {
             return;
         }
@@ -92,7 +99,7 @@ export class Letter {
     }
 
     getDistanceFrom(point: Point) {
-        return Math.sqrt(Math.pow(this.pos.x - point.x, 2) + Math.pow(this.pos.y - point.y, 2));
+        return this.pos.getDistanceFrom(point);
     }
 
     isInside(point: Point) {

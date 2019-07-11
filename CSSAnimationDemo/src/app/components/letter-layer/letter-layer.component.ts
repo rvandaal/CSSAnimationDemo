@@ -199,7 +199,7 @@ export class LetterLayerComponent implements OnInit {
   drawLetters(ctx: CanvasRenderingContext2D, time: number) {
     this.letters.forEach(l => {
       l.opacity = Math.min(2, time) / 2 * 0.9;
-      l.drawLetter(ctx);
+      l.draw(ctx);
     });
   }
 

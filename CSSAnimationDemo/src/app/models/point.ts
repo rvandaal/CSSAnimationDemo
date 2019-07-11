@@ -41,4 +41,11 @@ export class Point {
     public morph(point: Point, factorForOther: number): Point {
         return this.multiply(1 - factorForOther).addP(point.multiply(factorForOther));
     }
+
+    getDistanceFrom(point: Point): number {
+        if (point) {
+            return Math.sqrt(Math.pow(this.x - point.x, 2) + Math.pow(this.y - point.y, 2));
+        }
+        return Number.MAX_VALUE;
+    }
 }
