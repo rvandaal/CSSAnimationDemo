@@ -1,30 +1,26 @@
+import { Point } from './point';
+import { Vector } from './vector';
+import { Size } from './size';
+
 export class Letter {
 
     margin = 200;
     letter: string;
-    sizeX: number;
-    sizeY: number;
     opacity = 1;
     color = 'white';
+    size: Size;
     rotation: number;
-    x: number;
-    y: number;
-    vx: number;
-    vy: number;
-    ax: number;
-    ay: number;
+    pos: Point;
+    vel: Vector;
+    acc: Vector;
     isMovedByUser = false;
-    mouseX: number;
-    mouseY: number;
-    mouseDeltaX: number;
-    mouseDeltaY: number;
+    mousePoint: Point;
+    mouseDelta: Vector;
     isTarget = false;
     dropTime: number;
-    dropX: number;
-    dropY: number;
+    dropPoint: Point;
     dropRotation: number;
-    dropSizeX: number;
-    dropSizeY: number;
+    dropSize: Size;
     target: Letter;
     isDropped = false;
 
@@ -43,33 +39,28 @@ export class Letter {
                 return;
             }
 
-            this.x = progress * this.target.x + (1 - progress) * this.dropX;
-            this.y = progress * this.target.y + (1 - progress) * this.dropY;
+            this.pos = this.dropPoint.morph(this.target.pos, progress);
             this.rotation = progress * this.target.rotation + (1 - progress) * this.dropRotation;
-            this.sizeX = progress * this.target.sizeX + (1 - progress) * this.dropSizeX;
-            this.sizeY = progress * this.target.sizeY + (1 - progress) * this.dropSizeY;
+             // todo: weet niet of je een baseclass naar een subclass mag casten als de subclass geen fields toevoegt
+            this.size = this.dropSize.morph(this.target.size, progress) as Size;
             this.opacity = (1 - progress);
             return;
         }
         if (this.isMovedByUser) {
-            this.x = this.mouseX - this.sizeX / 2 - this.mouseDeltaX;
-            this.y = this.mouseY - this.sizeY / 2 - this.mouseDeltaY;
+            this.pos = this.mousePoint.subS(this.size.multiply(0.5)).subV(this.mouseDelta) as Point;
             return;
         }
-        this.vx += this.ax * dt;
-        this.vy += this.ay * dt;
-        this.x += this.vx * dt;
-        this.y += this.vy * dt;
+        this.vel = this.vel.addV(this.acc.multiply(dt));
+        this.pos = this.pos.addV(this.vel.multiply(dt));
 
-        if (this.x < -this.margin || this.x > window.innerWidth + this.margin) {
-            this.vx = -this.vx;
+        if (
+            this.pos.x < -this.margin || this.pos.x > window.innerWidth + this.margin ||
+            this.pos.y < -this.margin || this.pos.y > window.innerHeight + this.margin
+        ) {
+            this.vel.negate();
         }
 
-        if (this.y < -this.margin || this.y > window.innerHeight + this.margin) {
-            this.vy = -this.vy;
-        }
-
-        this.rotation = Math.tanh(this.vy / this.vx);
+        this.rotation = Math.tanh(this.vel.y / this.vel.x);
         return;
     }
 
@@ -79,35 +70,33 @@ export class Letter {
         }
         // Rotate the canvas and draw the text
         ctx.save();
-        ctx.font = this.sizeY + 'px Verdana, sans-serif';
+        ctx.font = this.size.y + 'px Verdana, sans-serif';
         ctx.fillStyle = this.color;
         ctx.textBaseline = 'bottom';
         ctx.globalAlpha = this.opacity;
         // Translate the context to the middle of the this
-        ctx.translate(this.x + this.sizeX / 2, this.y + this.sizeY / 2);
+        ctx.translate(this.pos.x + this.size.x / 2, this.pos.y + this.size.y / 2);
         // Rotate around origin of context (= now center of this)
         ctx.rotate(this.rotation);
         // Watch out: when writing a this at y = 0, its middle is at -height / 2.
         // So translate 'height' pixels extra in the y, because we assumed the center was at y = height / 2
-        ctx.fillText(this.letter, -this.sizeX / 2, this.sizeY / 2);
+        ctx.fillText(this.letter, -this.size.x / 2, this.size.y / 2);
         ctx.restore();
     }
 
     drop(target: Letter) {
         this.target = target;
         this.dropTime = new Date().getTime() / 1000;
-        this.dropX = this.x;
-        this.dropY = this.y;
+        this.dropPoint = this.pos.clone();
         this.dropRotation = this.rotation;
-        this.dropSizeX = this.sizeX;
-        this.dropSizeY = this.sizeY;
+        this.dropSize = this.size.clone();
     }
 
-    getDistanceFrom(otherX: number, otherY: number) {
-        return Math.sqrt(Math.pow(this.x + this.sizeX / 2 - otherX, 2) + Math.pow(this.y + this.sizeY / 2 - otherY, 2));
+    getDistanceFrom(point: Point) {
+        return Math.sqrt(Math.pow(this.pos.x + this.size.x / 2 - point.x, 2) + Math.pow(this.pos.y + this.size.y / 2 - point.y, 2));
     }
 
-    isInside(otherX: number, otherY: number) {
-        return this.getDistanceFrom(otherX, otherY) < this.sizeY / 2;
+    isInside(point: Point) {
+        return this.getDistanceFrom(point) < this.size.y / 2;
     }
 }

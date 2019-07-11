@@ -1,5 +1,8 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { Letter } from '../../models/letter';
+import { Point } from 'src/app/models/point';
+import { Vector } from 'src/app/models/vector';
+import { Size } from 'src/app/models/size';
 
 @Component({
   selector: 'app-letter-layer',
@@ -29,8 +32,7 @@ export class LetterLayerComponent implements OnInit {
   wordContainerTextOpacity = 0.7;
   isMouseDown = false;
   currentMovedLetter: Letter;
-  mouseX: number;
-  mouseY: number;
+  mousePoint: Point;
   aantalGedropt = 0;
 
   constructor() { }
@@ -42,20 +44,17 @@ export class LetterLayerComponent implements OnInit {
     const ctx = this.canvas.getContext('2d');
 
     this.canvas.onmousedown = (function (e) {
-      this.mouseX = e.x;
-      this.mouseY = e.y;
+      this.mousePoint = new Point(e.x, e.y);
       this.isMouseDown = true;
     }).bind(this);
 
     this.canvas.onmouseup = (function (e) {
-      this.mouseX = e.x;
-      this.mouseY = e.y;
+      this.mousePoint = new Point(e.x, e.y);
       this.isMouseDown = false;
     }).bind(this);
 
     this.canvas.onmousemove = (function (e) {
-      this.mouseX = e.x;
-      this.mouseY = e.y;
+      this.mousePoint = new Point(e.x, e.y);
     }).bind(this);
 
     const fontsize = 60;
@@ -100,16 +99,12 @@ export class LetterLayerComponent implements OnInit {
     allLetters.forEach(c => {
       const letter = new Letter();
       letter.letter = c;
-      letter.sizeX = fontsize + 20;
-      letter.sizeY = fontsize + 20;
+      letter.size = new Size(fontsize + 20, fontsize + 20);
       letter.opacity = 0.3;
-      letter.x = Math.random() * window.innerWidth;
-      letter.y = Math.random() * window.innerHeight;
+      letter.pos = new Point(Math.random() * window.innerWidth, Math.random() * window.innerHeight);
       const mul = 50;
-      letter.vx = Math.random() * 2 * mul - mul;
-      letter.vy = Math.random() * 2 * mul - mul;
-      letter.ax = (Math.random() * 2 * mul - mul) * 0;
-      letter.ay = (Math.random() * 2 * mul - mul) * 0;
+      letter.vel = new Vector(Math.random() * 2 * mul - mul, Math.random() * 2 * mul - mul);
+      letter.acc = new Vector(0, 0);
       this.letters.push(letter);
     });
   }
@@ -126,23 +121,30 @@ export class LetterLayerComponent implements OnInit {
       const letter = new Letter();
       letter.isTarget = true;
       letter.letter = character;
-      letter.sizeX = fontsize;
-      letter.sizeY = fontsize;
+      letter.size = new Size(fontsize, fontsize);
       if (position === 'top') {
-        letter.x = (canvasWidth + wordWidth) / 2 - (i + 1) * fontsize;
-        letter.y = wordContainerMargin + wordContainerHalfheight - fontsize / 2;
+        letter.pos = new Point(
+          (canvasWidth + wordWidth) / 2 - (i + 1) * fontsize,
+          wordContainerMargin + wordContainerHalfheight - fontsize / 2
+        );
         letter.rotation = Math.PI;
       } else if (position === 'bottom') {
-        letter.x = (canvasWidth - wordWidth) / 2 + i * fontsize;
-        letter.y = canvasHeight - wordContainerMargin - wordContainerHalfheight - fontsize / 2;
+        letter.pos = new Point(
+          (canvasWidth - wordWidth) / 2 + i * fontsize,
+          canvasHeight - wordContainerMargin - wordContainerHalfheight - fontsize / 2
+        );
         letter.rotation = 0;
       } else if (position === 'left') {
-        letter.x = wordContainerMargin + wordContainerHalfheight - fontsize / 2;
-        letter.y = (canvasHeight - wordWidth) / 2 + i * fontsize;
+        letter.pos = new Point(
+          wordContainerMargin + wordContainerHalfheight - fontsize / 2,
+          (canvasHeight - wordWidth) / 2 + i * fontsize
+        );
         letter.rotation = Math.PI / 2;
       } else if (position === 'right') {
-        letter.x = canvasWidth - wordContainerMargin - wordContainerHalfheight - fontsize / 2;
-        letter.y = (canvasHeight + wordWidth) / 2 - (i + 1) * fontsize;
+        letter.pos = new Point(
+          canvasWidth - wordContainerMargin - wordContainerHalfheight - fontsize / 2,
+          (canvasHeight + wordWidth) / 2 - (i + 1) * fontsize
+        );
         letter.rotation = -Math.PI / 2;
       }
       this.letters.push(letter);
@@ -154,27 +156,24 @@ export class LetterLayerComponent implements OnInit {
       if (!l.isTarget) {
         l.color = 'white';
       }
-      if (l.isInside(this.mouseX, this.mouseY) && !l.isTarget && !this.currentMovedLetter && !l.target && !l.isDropped) {
+      if (l.isInside(this.mousePoint) && !l.isTarget && !this.currentMovedLetter && !l.target && !l.isDropped) {
         l.color = 'orange';
         l.isMovedByUser = this.isMouseDown;
         if (this.isMouseDown) {
           this.currentMovedLetter = l;
-          l.mouseX = this.mouseX;
-          l.mouseY = this.mouseY;
-          l.mouseDeltaX = l.mouseX - l.x - l.sizeX / 2;
-          l.mouseDeltaY = l.mouseY - l.y - l.sizeY / 2;
+          l.mousePoint = this.mousePoint;
+          l.mouseDelta = l.mousePoint.subP(l.pos).subS(l.size.multiply(0.5));
         }
       }
       if (this.currentMovedLetter) {
-        this.currentMovedLetter.mouseX = this.mouseX;
-        this.currentMovedLetter.mouseY = this.mouseY;
+        this.currentMovedLetter.mousePoint = this.mousePoint;
         if (!this.isMouseDown) {
           // letter is dropped, check target
           const targetLetters = this.letters.filter(le => le.isTarget && !le.isDropped);
           // tslint:disable-next-line:prefer-const
           for (let tl of targetLetters) {
             if (
-              tl.isInside(this.currentMovedLetter.mouseX, this.currentMovedLetter.mouseY) &&
+              tl.isInside(this.currentMovedLetter.mousePoint) &&
               tl.letter === this.currentMovedLetter.letter
             ) {
               // Target geraakt
