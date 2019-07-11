@@ -40,4 +40,8 @@ export class Vector {
     public negate() {
         return new Vector(-this.x, -this.y);
     }
+
+    public clip(maxX, maxY) {
+        return new Vector(Math.min(Math.max(this.x, -maxX), maxX), Math.min(Math.max(this.y, -maxY), maxY));
+    }
 }

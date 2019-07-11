@@ -10,6 +10,12 @@ export enum LetterState {
 }
 
 export class Letter {
+
+    static wordFactors = {
+        i: 0.8,
+        w: 1.2
+    };
+
     state = LetterState.Floating;
     letter: string;
     opacity = 1;
@@ -27,6 +33,25 @@ export class Letter {
     dropRotation: number;
     dropSize: Size;
     target: Letter;
+
+    get widthFactor() {
+        if (Letter.wordFactors[this.letter.toLowerCase()]) {
+            return Letter.wordFactors[this.letter.toLowerCase()];
+        }
+        return 1;
+    }
+
+    get width() {
+        return this.size.x * this.widthFactor;
+    }
+
+    get height() {
+        return this.size.y;
+    }
+
+    get isVertical() {
+        return this.rotation !== 0 && this.rotation !== Math.PI;
+    }
 
     simulate(currentTime: number, dt: number) {
         if (this.isTarget || this.state === LetterState.Dropped) {
@@ -53,7 +78,7 @@ export class Letter {
             this.pos = this.mousePoint.subV(this.mouseDelta) as Point;
             return;
         }
-        this.vel = this.vel.addV(this.acc.multiply(dt));
+        this.vel = this.vel.addV(this.acc.multiply(dt)).clip(30, 30);
         this.pos = this.pos.addV(this.vel.multiply(dt));
         this.acc = new Vector((window.innerWidth / 2 - this.pos.x) * 0.005, (window.innerHeight / 2 - this.pos.y) * 0.005);
         this.rotation = Math.tanh(Math.abs(this.vel.y / this.vel.x));
@@ -76,7 +101,10 @@ export class Letter {
         ctx.rotate(this.rotation);
         // Watch out: when writing a this at y = 0, its middle is at -height / 2.
         // So translate 'height' pixels extra in the y, because we assumed the center was at y = height / 2
-        ctx.fillText(this.letter, -this.size.x / 2, this.size.y / 2);
+        ctx.strokeStyle = 'black';
+        // Temprarily show bounding box
+        // ctx.strokeRect(-this.width / 2, -this.height / 2, this.width, this.height);
+        ctx.fillText(this.letter, -this.width / 2 + 10, this.height / 2 + 5);
         ctx.restore();
     }
 
@@ -93,7 +121,13 @@ export class Letter {
         return this.pos.getDistanceFrom(point);
     }
 
-    isInside(point: Point) {
-        return this.getDistanceFrom(point) < this.size.y / 2;
+    contains(point: Point) {
+        if (!this.isTarget) {
+            // Non target letters can be rotated, so use a circle to do the hit test
+            return this.getDistanceFrom(point) < this.height / 2;
+        }
+        // Target letter is rectangle, use bounding box to do the hittest
+        return this.pos.x - this.width / 2 < point.x && point.x < this.pos.x + this.width / 2 &&
+               this.pos.y - this.height / 2 < point.y && point.y < this.pos.y + this.height / 2;
     }
 }

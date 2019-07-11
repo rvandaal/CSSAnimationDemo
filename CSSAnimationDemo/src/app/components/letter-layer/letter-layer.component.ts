@@ -44,17 +44,30 @@ export class LetterLayerComponent implements OnInit {
     const ctx = this.canvas.getContext('2d');
 
     this.canvas.onmousedown = (function (e) {
-      this.mousePoint = new Point(e.x, e.y);
+      //
+      // Strange behavior that might have to do with the top=-20px of the body
+      // The mouse corresponds with the dimensions of the canvas, but the word containers are placed with an offset of 20px
+      // Meaning that the mouse will still hover a targetletter when it's 20px below it, in the bottom row
+      // In the top row this is only 3px or so.
+      // So we could correct the mouse position to account for the 20px difference.
+      // The correction below works for now, even if the mouse is not the guilty one.
+      // For example: the bottom border of a targetletter is at y = 666, but at this border, the mouse is 646.
+      // So we need to multiply the mouse position with 666 / (666 - 20), so the transition will happen at 666 iso 646.
+      //
+      const correction = this.canvas.height / (this.canvas.height - 20);
+      this.mousePoint = new Point(e.x, e.y * correction);
       this.isMouseDown = true;
     }).bind(this);
 
     this.canvas.onmouseup = (function (e) {
-      this.mousePoint = new Point(e.x, e.y);
+      const correction = this.canvas.height / (this.canvas.height - 20);
+      this.mousePoint = new Point(e.x, e.y * correction);
       this.isMouseDown = false;
     }).bind(this);
 
     this.canvas.onmousemove = (function (e) {
-      this.mousePoint = new Point(e.x, e.y);
+      const correction = this.canvas.height / (this.canvas.height - 20);
+      this.mousePoint = new Point(e.x, e.y * correction);
     }).bind(this);
 
     const fontsize = 60;
@@ -112,8 +125,24 @@ export class LetterLayerComponent implements OnInit {
     const canvasWidth = window.innerWidth;
     const canvasHeight = window.innerHeight;
     const wordWidth = word.length * fontsize;
-    const wordContainerMargin = 10;
-    const wordContainerHalfheight = 50;
+    const wordContainerMargin = 20;
+    const wordContainerHalfheight = 40;
+
+    let currentPosition;
+    switch (position) {
+      case 'top':
+        currentPosition = (canvasWidth + wordWidth) / 2;
+        break;
+      case 'bottom':
+        currentPosition = (canvasWidth - wordWidth) / 2;
+        break;
+      case 'left':
+        currentPosition = (canvasHeight - wordWidth) / 2;
+        break;
+      case 'right':
+        currentPosition = (canvasHeight + wordWidth) / 2;
+        break;
+    }
 
     for (let i = 0; i < word.length; i++) {
       const character = word.charAt(i);
@@ -123,28 +152,32 @@ export class LetterLayerComponent implements OnInit {
       letter.size = new Size(fontsize, fontsize);
       if (position === 'top') {
         letter.pos = new Point(
-          (canvasWidth + wordWidth) / 2 - (i + 0.5) * fontsize,
+          currentPosition - 0.5 * letter.width,
           wordContainerMargin + wordContainerHalfheight
         );
         letter.rotation = Math.PI;
+        currentPosition -= letter.width;
       } else if (position === 'bottom') {
         letter.pos = new Point(
-          (canvasWidth - wordWidth) / 2 + (i + 0.5) * fontsize,
+          currentPosition + 0.5 * letter.width,
           canvasHeight - wordContainerMargin - wordContainerHalfheight
         );
         letter.rotation = 0;
+        currentPosition += letter.width;
       } else if (position === 'left') {
         letter.pos = new Point(
           wordContainerMargin + wordContainerHalfheight,
-          (canvasHeight - wordWidth) / 2 + (i + 0.5) * fontsize
+          currentPosition + 0.5 * letter.width
         );
         letter.rotation = Math.PI / 2;
+        currentPosition += letter.width;
       } else if (position === 'right') {
         letter.pos = new Point(
           canvasWidth - wordContainerMargin - wordContainerHalfheight,
-          (canvasHeight + wordWidth) / 2 - (i + 0.5) * fontsize
+          currentPosition - 0.5 * letter.width
         );
         letter.rotation = -Math.PI / 2;
+        currentPosition -= letter.width;
       }
       this.letters.push(letter);
     }
@@ -152,11 +185,10 @@ export class LetterLayerComponent implements OnInit {
 
   checkInteractionLetters() {
     if (!this.currentMovedLetter) {
-      this.letters.forEach(l => {
-        if (!l.isTarget) {
-          l.color = 'white';
-        }
-        if (!l.isTarget && l.state < LetterState.BeingDropped && l.isInside(this.mousePoint)) {
+      this.letters.filter(l => !l.isTarget).forEach(l => l.color = 'white');
+      // tslint:disable-next-line:prefer-const
+      for (let l of this.letters) {
+        if (!l.isTarget && l.state < LetterState.BeingDropped && l.contains(this.mousePoint)) {
           l.color = 'orange';
           if (this.isMouseDown) {
             this.currentMovedLetter = l;
@@ -164,19 +196,23 @@ export class LetterLayerComponent implements OnInit {
             l.mousePoint = this.mousePoint.clone();
             l.mouseDelta = l.mousePoint.subP(l.pos);
           }
+          return;
         }
-      });
+      }
     } else {
       this.currentMovedLetter.mousePoint = this.mousePoint.clone();
-      if (!this.isMouseDown) {
-        // letter is dropped, check target
-        const targetLetters = this.letters.filter(le => le.isTarget && le.state !== LetterState.Dropped);
-        // tslint:disable-next-line:prefer-const
-        for (let tl of targetLetters) {
-          if (
-            tl.isInside(this.currentMovedLetter.mousePoint) &&
-            tl.letter === this.currentMovedLetter.letter
-          ) {
+      const targetLetters = this.letters.filter(le => le.isTarget && le.state !== LetterState.Dropped);
+      let hasLetterBeHovered = false;
+      // tslint:disable-next-line:prefer-const
+      for (let tl of targetLetters) {
+        if (this.isLetterHovered(tl)) {
+          if (!hasLetterBeHovered) {
+            tl.color = 'yellow';
+            hasLetterBeHovered = true;
+          } else {
+            tl.color = 'white';
+          }
+          if (!this.isMouseDown && tl.letter === this.currentMovedLetter.letter) {
             // Losgelaten boven juiste target
             this.currentMovedLetter.drop(tl);
             this.currentMovedLetter = null;
@@ -184,7 +220,11 @@ export class LetterLayerComponent implements OnInit {
             this.gedropt.emit(this.aantalGedropt);
             return;
           }
+        } else {
+          tl.color = 'white';
         }
+      }
+      if (!this.isMouseDown) {
         this.currentMovedLetter.state = LetterState.Floating;
         this.currentMovedLetter = null;
       }
@@ -206,5 +246,9 @@ export class LetterLayerComponent implements OnInit {
 
   getCurrentTime() {
     return new Date().getTime() / 1000;
+  }
+
+  isLetterHovered(letter: Letter) {
+    return letter.contains(this.mousePoint);
   }
 }
