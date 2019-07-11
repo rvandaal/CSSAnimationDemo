@@ -55,7 +55,7 @@ export class Letter {
         }
         this.vel = this.vel.addV(this.acc.multiply(dt));
         this.pos = this.pos.addV(this.vel.multiply(dt));
-        this.acc = new Vector((window.innerWidth / 2 - this.pos.x) * 0.01, (window.innerHeight / 2 - this.pos.y) * 0.01);
+        this.acc = new Vector((window.innerWidth / 2 - this.pos.x) * 0.005, (window.innerHeight / 2 - this.pos.y) * 0.005);
         this.rotation = Math.tanh(Math.abs(this.vel.y / this.vel.x));
         return;
     }

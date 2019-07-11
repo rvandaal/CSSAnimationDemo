@@ -101,7 +101,7 @@ export class LetterLayerComponent implements OnInit {
       letter.size = new Size(fontsize + 20, fontsize + 20);
       letter.opacity = 0.3;
       letter.pos = new Point(Math.random() * window.innerWidth, Math.random() * window.innerHeight);
-      const mul = 50;
+      const mul = 30;
       letter.vel = new Vector(Math.random() * 2 * mul - mul, Math.random() * 2 * mul - mul);
       letter.acc = new Vector(0, 0);
       this.letters.push(letter);
