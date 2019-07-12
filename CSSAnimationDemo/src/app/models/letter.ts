@@ -14,7 +14,11 @@ export class Letter {
     static wordFactors = {
         f: 0.9,
         i: 0.8,
+        j: 0.8,
         l: 0.9,
+        n: 1.1,
+        p: 0.9,
+        t: 0.9,
         w: 1.2
     };
 
@@ -36,15 +40,19 @@ export class Letter {
     dropSize: Size;
     target: Letter;
 
-    get widthFactor() {
-        if (Letter.wordFactors[this.letter.toLowerCase()]) {
-            return Letter.wordFactors[this.letter.toLowerCase()];
+    static getNormalizedWordWidth(word: string) {
+        return word.split('').map(w => Letter.getWidthFactor(w)).reduce((p, c) => p + c);
+    }
+
+    static getWidthFactor(character: string) {
+        if (Letter.wordFactors[character.toLowerCase()]) {
+            return Letter.wordFactors[character.toLowerCase()];
         }
         return 1;
     }
 
     get width() {
-        return this.size.x * this.widthFactor;
+        return this.size.x * Letter.getWidthFactor(this.letter);
     }
 
     get height() {

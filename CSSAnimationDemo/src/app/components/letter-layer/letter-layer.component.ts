@@ -124,7 +124,7 @@ export class LetterLayerComponent implements OnInit {
   initializeTargetWord(word: string, position: string, fontsize: number) {
     const canvasWidth = window.innerWidth;
     const canvasHeight = window.innerHeight;
-    const wordWidth = word.length * fontsize;
+    const wordWidth = Letter.getNormalizedWordWidth(word) * fontsize;
     const wordContainerMargin = 20;
     const wordContainerHalfheight = 40;
 
