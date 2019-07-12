@@ -236,7 +236,7 @@ export class LetterLayerComponent implements OnInit {
 
   simulateLetters(currentTime: number, dt: number) {
     this.letters.forEach(l => {
-      l.simulate(currentTime, dt);
+      l.simulate(currentTime, dt * Math.max(1, (5 - this.aantalTePlaatsenLetters / 8)));
     });
   }
 
