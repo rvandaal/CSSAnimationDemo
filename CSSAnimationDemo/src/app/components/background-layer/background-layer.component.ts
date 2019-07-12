@@ -8,7 +8,7 @@ import { Component, OnInit, Input } from '@angular/core';
 export class BackgroundLayerComponent implements OnInit {
 
   @Input()
-  aantalGedropt: number;
+  aantalTePlaatsenLetters: number;
 
   constructor() { }
 

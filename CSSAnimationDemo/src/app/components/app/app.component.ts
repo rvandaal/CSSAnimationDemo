@@ -8,7 +8,7 @@ import { until } from 'protractor';
 })
 export class AppComponent {
   title = 'app';
-  aantalGedropt = 0;
+  aantalTePlaatsenLetters = 0;
 
   topWord: string;
   bottomWord: string;
@@ -85,6 +85,6 @@ export class AppComponent {
 
 
   onGedropt(aantal: number) {
-    this.aantalGedropt = aantal;
+    this.aantalTePlaatsenLetters = aantal;
   }
 }

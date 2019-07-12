@@ -73,7 +73,7 @@ export class Letter {
             if (progress > 1) {
                 this.state = LetterState.Dropped;
                 this.target.state = LetterState.Dropped;
-                this.target.color = 'red';
+                this.target.color = 'yellow';
                 this.target = null;
                 return;
             }
@@ -90,7 +90,10 @@ export class Letter {
         }
         this.vel = this.vel.addV(this.acc.multiply(dt)).clip(30, 30);
         this.pos = this.pos.addV(this.vel.multiply(dt));
-        this.acc = new Vector((window.innerWidth / 2 - this.pos.x) * 0.005, (window.innerHeight / 2 - this.pos.y) * 0.005);
+        const centerScreen = new Point(window.innerWidth / 2, window.innerHeight / 2);
+        if (this.getDistanceFrom(centerScreen) > 400) {
+            this.acc = centerScreen.subP(this.pos).multiply(0.005);
+        }
         this.rotation = Math.tanh(Math.abs(this.vel.y / this.vel.x));
         return;
     }

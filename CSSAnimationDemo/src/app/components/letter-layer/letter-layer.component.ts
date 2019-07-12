@@ -33,11 +33,14 @@ export class LetterLayerComponent implements OnInit {
   isMouseDown = false;
   currentMovedLetter: Letter;
   mousePoint: Point;
-  aantalGedropt = 0;
+  aantalTePlaatsenLetters = 0;
 
   constructor() { }
 
   ngOnInit() {
+    this.aantalTePlaatsenLetters = (this.topWord + this.bottomWord + this.leftWord + this.rightWord).length;
+    this.gedropt.emit(this.aantalTePlaatsenLetters);
+
     this.canvas = document.querySelector('canvas');
     this.canvas.width = window.innerWidth; // blijkbaar is width en height op 100% zetten via CSS niet genoeg!
     this.canvas.height = window.innerHeight;
@@ -207,7 +210,7 @@ export class LetterLayerComponent implements OnInit {
       for (let tl of targetLetters) {
         if (this.isLetterHovered(tl)) {
           if (!hasLetterBeHovered) {
-            tl.color = 'yellow';
+            tl.color = 'lightgreen';
             hasLetterBeHovered = true;
           } else {
             tl.color = 'white';
@@ -216,8 +219,8 @@ export class LetterLayerComponent implements OnInit {
             // Losgelaten boven juiste target
             this.currentMovedLetter.drop(tl);
             this.currentMovedLetter = null;
-            this.aantalGedropt += 1;
-            this.gedropt.emit(this.aantalGedropt);
+            this.aantalTePlaatsenLetters -= 1;
+            this.gedropt.emit(this.aantalTePlaatsenLetters);
             return;
           }
         } else {
