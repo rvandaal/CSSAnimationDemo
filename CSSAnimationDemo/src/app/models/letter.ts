@@ -91,9 +91,7 @@ export class Letter {
         this.vel = this.vel.addV(this.acc.multiply(dt)).clip(30, 30);
         this.pos = this.pos.addV(this.vel.multiply(dt));
         const centerScreen = new Point(window.innerWidth / 2, window.innerHeight / 2);
-        if (this.getDistanceFrom(centerScreen) > 400) {
-            this.acc = centerScreen.subP(this.pos).multiply(0.005);
-        }
+        this.acc = centerScreen.subP(this.pos).multiply(0.005);
         this.rotation = Math.tanh(Math.abs(this.vel.y / this.vel.x));
         return;
     }
