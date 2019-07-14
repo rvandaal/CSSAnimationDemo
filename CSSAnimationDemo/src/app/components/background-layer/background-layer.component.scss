@@ -1,6 +1,8 @@
 $word-container-margin: 20px;
-$word-container-halfheight: 40px;
 $word-container-height: 80px;
+$word-container-halfheight: 40px;
+$word-container-width: 700px;
+$word-container-halfwidth: 350px;
 
 .background { 
     background: url(../../../assets/images/background.png) no-repeat center center fixed;
@@ -39,34 +41,28 @@ $word-container-height: 80px;
 app-word-container {
     display: block;
     position: absolute;
+    width: $word-container-width;
+    height: $word-container-height;
 }
 
 app-word-container.top {
-    width: 36%;
-    height: $word-container-height;
     top: $word-container-margin;
-    left: 32%;
+    left: calc(50% - #{$word-container-halfwidth});
 }
 app-word-container.bottom {
-    width: 36%;
-    height: $word-container-height;
     bottom: $word-container-margin;
-    left: 32%;
+    left: calc(50% - #{$word-container-halfwidth});
     transform: rotate(180deg);
 }
 app-word-container.left {
-    width: 36%;
-    height: $word-container-height;
-    left: $word-container-margin;
+    left: calc(#{$word-container-margin + $word-container-halfheight - $word-container-halfwidth});
     top: calc(50% - #{$word-container-halfheight});
-    transform: translateX(calc(-50% + #{$word-container-halfheight})) rotate(-90deg);
+    transform: rotate(90deg)
 }
 app-word-container.right {
-    width: 36%;
-    height: $word-container-height;
-    right: $word-container-margin;
+    right: calc(#{$word-container-margin + $word-container-halfheight - $word-container-halfwidth});
     top: calc(50% - #{$word-container-halfheight});
-    transform: translateX(calc(50% - #{$word-container-halfheight})) rotate(90deg);
+    transform: rotate(90deg);
 }
 
 .aantal {
