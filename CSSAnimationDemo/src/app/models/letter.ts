@@ -91,6 +91,14 @@ export class Letter {
         }
         this.vel = this.vel.addV(this.acc.multiply(dt)).clip(30, 30);
         this.pos = this.pos.addV(this.vel.multiply(dt));
+
+        if (this.pos.x < -100 || this.pos.x > window.innerWidth + 100) {
+            this.vel = new Vector(-this.vel.x, this.vel.y);
+        }
+        if (this.pos.y < -100 || this.pos.y > window.innerHeight + 100) {
+            this.vel = new Vector(this.vel.x, -this.vel.y);
+        }
+
         const centerScreen = new Point(window.innerWidth / 2, window.innerHeight / 2);
         this.acc = centerScreen.subP(this.pos).multiply(0.001);
         this.rotation = Math.tanh(Math.abs(this.vel.y / this.vel.x));
