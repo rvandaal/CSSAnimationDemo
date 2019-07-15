@@ -24,7 +24,7 @@ export class LetterLayerComponent implements OnInit {
   rightWord: string;
 
   @Output()
-  gedropt = new EventEmitter<number>();
+  gedropt = new EventEmitter<[number, string]>();
 
   canvas: HTMLCanvasElement;
   letters: Letter[];
@@ -39,7 +39,7 @@ export class LetterLayerComponent implements OnInit {
 
   ngOnInit() {
     this.aantalTePlaatsenLetters = (this.topWord + this.bottomWord + this.leftWord + this.rightWord).length;
-    this.gedropt.emit(this.aantalTePlaatsenLetters);
+    setTimeout(() => this.gedropt.emit([this.aantalTePlaatsenLetters, '']), 0);
 
     this.canvas = document.querySelector('canvas');
     this.canvas.width = window.innerWidth; // blijkbaar is width en height op 100% zetten via CSS niet genoeg!
@@ -152,6 +152,7 @@ export class LetterLayerComponent implements OnInit {
       const letter = new Letter();
       letter.isTarget = true;
       letter.letter = character;
+      letter.side = position;
       letter.size = new Size(fontsize, fontsize);
       if (position === 'top') {
         letter.pos = new Point(
@@ -220,7 +221,7 @@ export class LetterLayerComponent implements OnInit {
             this.currentMovedLetter.drop(tl);
             this.currentMovedLetter = null;
             this.aantalTePlaatsenLetters -= 1;
-            this.gedropt.emit(this.aantalTePlaatsenLetters);
+            this.gedropt.emit([this.aantalTePlaatsenLetters, tl.side]);
             return;
           }
         } else {

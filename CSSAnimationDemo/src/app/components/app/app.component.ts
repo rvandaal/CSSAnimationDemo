@@ -8,7 +8,8 @@ import { until } from 'protractor';
 })
 export class AppComponent {
   title = 'app';
-  aantalTePlaatsenLetters = 0;
+  aantalTePlaatsenLetters: number;
+  laatsteDropSide: string;
 
   topWord: string;
   bottomWord: string;
@@ -84,7 +85,9 @@ export class AppComponent {
 
 
 
-  onGedropt(aantal: number) {
-    this.aantalTePlaatsenLetters = aantal;
+  onGedropt(data: [number, string]) {
+    this.aantalTePlaatsenLetters = data[0];
+    this.laatsteDropSide = data[1];
+    setTimeout(() => this.laatsteDropSide = '', 2000);
   }
 }

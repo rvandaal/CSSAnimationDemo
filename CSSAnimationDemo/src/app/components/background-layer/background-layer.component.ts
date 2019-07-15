@@ -10,6 +10,9 @@ export class BackgroundLayerComponent implements OnInit {
   @Input()
   aantalTePlaatsenLetters: number;
 
+  @Input()
+  laatsteDropSide: string;
+
   constructor() { }
 
   ngOnInit() {

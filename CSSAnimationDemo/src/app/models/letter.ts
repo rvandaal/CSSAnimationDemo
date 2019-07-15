@@ -39,6 +39,7 @@ export class Letter {
     dropRotation: number;
     dropSize: Size;
     target: Letter;
+    side: string;
 
     static getNormalizedWordWidth(word: string) {
         return word.split('').map(w => Letter.getWidthFactor(w)).reduce((p, c) => p + c);

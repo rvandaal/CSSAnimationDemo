@@ -1,4 +1,4 @@
-<div class="word-container">
+<div class="word-container" #wordcontainer  [ngClass]="{'animate': laatsteDropSide === side, 'bottom': side === 'bottom'}">
     <svg viewBox="0 0 1400 160" width="700px" height="80px" opacity="0.13">
         <defs>
             <pattern id="stars" x="0" y="0" width="52" height="52" patternUnits="userSpaceOnUse">

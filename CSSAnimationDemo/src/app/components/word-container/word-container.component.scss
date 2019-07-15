@@ -3,4 +3,35 @@
     height: 80px;
     border-radius: 15px;
     background: #9B3863;
+
+    &.animate {
+        background: linear-gradient(120deg, #9B3863 0%,#9B3863 44%, #c7658f 49%, #c7658f 51%, #9B3863 56%, #9B3863 100%);
+        background-size: 400% 400%;
+        animation: Gradient linear 1.2s;
+        animation-delay: 0.3s;
+        animation-iteration-count: 1;
+        background-position: 0% 0%;
+
+        &.bottom {
+            animation: Gradient_bottom linear 1.2s;
+        }
+    }
+}
+
+@keyframes Gradient {
+	0% {
+		background-position: 100% 0%
+	}
+	100% {
+		background-position: 0% 0%
+	}
+}
+
+@keyframes Gradient_bottom {
+	0% {
+		background-position: 0% 0%
+	}
+	100% {
+		background-position: 100% 0%
+	}
 }
